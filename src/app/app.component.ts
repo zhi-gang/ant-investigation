@@ -78,12 +78,14 @@ export class AppComponent implements OnInit {
         "skuId": "sku202411271627287013kb",
         "displayName": "规格 1",
         "values": [
-          "200",
-          "500"
-        ],
-        "valueIds": [
-          "sv20241127162728632YtI",
-          "sv20241127162728654abW"
+          {
+            "valueId": "sv20241127162728632YtI",
+            "value": "200"
+          },
+          {
+            "valueId": "sv20241127162728654abW",
+            "value": "500"
+          }
         ],
         "stock": 0,
         "price": 4.3,
@@ -97,12 +99,14 @@ export class AppComponent implements OnInit {
         "skuId": "sku20241127162728733nEM",
         "displayName": "规格 2",
         "values": [
-          "200",
-          "600"
-        ],
-        "valueIds": [
-          "sv20241127162728632YtI",
-          "sv20241127162728654fS6"
+          {
+            "valueId": "sv20241127162728632YtI",
+            "value": "200"
+          },
+          {
+            "valueId": "sv20241127162728654fS6",
+            "value": "600"
+          }
         ],
         "stock": 0,
         "price": 4.23,
@@ -116,12 +120,14 @@ export class AppComponent implements OnInit {
         "skuId": "sku202411271627287565mY",
         "displayName": "规格 3",
         "values": [
-          "300",
-          "500"
-        ],
-        "valueIds": [
-          "sv20241127162728632H3G",
-          "sv20241127162728654abW"
+          {
+            "valueId": "sv20241127162728632H3G",
+            "value": "300"
+          },
+          {
+            "valueId": "sv20241127162728654abW",
+            "value": "500"
+          }
         ],
         "stock": 0,
         "price": 2.3,
@@ -135,12 +141,14 @@ export class AppComponent implements OnInit {
         "skuId": "sku20241127162728770AVk",
         "displayName": "规格 4",
         "values": [
-          "300",
-          "600"
-        ],
-        "valueIds": [
-          "sv20241127162728632H3G",
-          "sv20241127162728654fS6"
+          {
+            "valueId": "sv20241127162728632H3G",
+            "value": "300"
+          },
+          {
+            "valueId": "sv20241127162728654fS6",
+            "value": "600"
+          }
         ],
         "stock": 0,
         "price": 4.3,
@@ -158,7 +166,7 @@ export class AppComponent implements OnInit {
 
   constructor(private fb: FormBuilder) {
     this.formGroup = this.fb.group({
-      specs: [],
+      specControls: [],
       name: ['', Validators.required],
       skuControls: []
     });
@@ -168,14 +176,15 @@ export class AppComponent implements OnInit {
     this.specColumns = this.skus.specs;
     this.skuTableData = this.skus.skuSnapshotList;
     this.formGroup = this.fb.group({
-      name: ['', Validators.required],
+      // name: ['', Validators.required],
       skuControls: this.fb.array(this.skuTableData.map((sku: any) => this.createSkuGroup(sku))),
-      specs:       this.fb.array(this.specs.map((spec:any) =>this.createSpecGroup(spec)))
+      specControls: this.fb.array(this.specs.map((spec: any) => this.createSpecGroup(spec)))
     });
   }
+
   createSpecGroup(spec: any): FormGroup {
     return this.fb.group({
-      specId: [{ value: spec.specId, disabled: true }], // Read-only
+      specId: [{value: spec.specId, disabled: true}], // Read-only
       specName: [spec.specName, Validators.required],
       displayOrder: [spec.displayOrder],
       values: this.fb.array(spec.values.map((value: any) => this.createValueGroup(value)))
@@ -184,7 +193,7 @@ export class AppComponent implements OnInit {
 
   createValueGroup(value: any): FormGroup {
     return this.fb.group({
-      valueId: [{ value: value.valueId, disabled: true }], // Read-only
+      valueId: [{value: value.valueId, disabled: true}], // Read-only
       value: [value.value, Validators.required],
       displayOrder: [value.displayOrder]
     });
@@ -193,7 +202,7 @@ export class AppComponent implements OnInit {
   // Add a new value to a spec
   addValue(specIndex: number): void {
     const valuesArray = this.getValuesArray(specIndex);
-    valuesArray.push(this.createValueGroup({ valueId: '', value: '', displayOrder: 0 }));
+    valuesArray.push(this.createValueGroup({valueId: '', value: '', displayOrder: 0}));
   }
 
   // Remove a value from a spec
@@ -204,16 +213,18 @@ export class AppComponent implements OnInit {
 
   // Get the FormArray for values of a specific spec
   getValuesArray(specIndex: number): FormArray {
-    const specGroup = (this.formGroup.get('specs') as FormArray).at(specIndex) as FormGroup;
+    const specGroup = (this.formGroup.get('specControls') as FormArray).at(specIndex) as FormGroup;
     return specGroup.get('values') as FormArray;
   }
 
-  get specControls(): FormArray{
-    return this.formGroup.get('specs') as FormArray;
+  get specControls(): FormArray {
+    return this.formGroup.get('specControls') as FormArray;
   }
+
   getSpecFormGroup(index: number): FormGroup {
     return this.specControls.at(index) as FormGroup;
   }
+
   getSpecValueFormGroup(index: number, valueIndex: number): FormGroup {
     return this.getValuesArray(index).at(valueIndex) as FormGroup;
   }
@@ -256,5 +267,57 @@ export class AppComponent implements OnInit {
     }
   }
 
-  protected readonly FormGroup = FormGroup;
+  // protected readonly FormGroup = FormGroup;
+
+  refreshSpecName(specs: any) {
+    // let specs: { specId: any; specName: any; values: any }[] = formData.specControls;
+    this.specColumns.forEach((spec: any) => {
+      let specId = spec.specId;
+
+      let s = specs.find((s: { specId: any; }) => {
+        return s.specId === specId
+      });
+      if (s) {
+        spec.specName = s.specName;
+      }
+    });
+  }
+
+  refreshSpecValues(specs: any) {
+
+// 使用map方法提取每个对象的values属性，组成新数组
+    let valuesArray = specs.map((spec: any[]) => spec.values).flat();
+
+    this.skuTableData.forEach(
+      (sku: any) => {
+        sku.values.forEach(
+          (value: any) => {
+            let valueId = value.valueId;
+            let v = valuesArray.find((value: { valueId: any; }) => {
+              return value.valueId === valueId;
+            });
+            if (v) {
+              value.value = v.value;
+            }
+          }
+        )
+      }
+    )
+    this.formGroup.patchValue({"skuTableData": this.skuTableData});
+    // this.formGroup = this.fb.group({
+    //   skuControls: this.fb.array(this.skuTableData.map((sku: any) => this.createSkuGroup(sku))),
+    // });
+  }
+
+  refreshSku() {
+    if (this.formGroup.valid) {
+      const formData = this.formGroup.getRawValue();
+      console.log('Form submitted:', formData);
+      let specs: { specId: any; specName: any; values: any }[] = formData.specControls;
+      this.refreshSpecName(specs);
+      this.refreshSpecValues(specs);
+    } else {
+      console.error('Form is invalid');
+    }
+  }
 }

@@ -1,13 +1,13 @@
 <form nz-form [formGroup]="formGroup" (ngSubmit)="onSubmit()" nzLayout="vertical">
-  <nz-form-item>
-    <nz-form-label [nzSpan]="4" nzFor="name">名称</nz-form-label>
-    <nz-form-control [nzSpan]="20">
-      <input formControlName="name" nz-input placeholder="请输入名称"/>
-      <div *ngIf="formGroup.get('name')?.invalid && (formGroup.get('name')?.touched || formGroup.get('name')?.dirty)">
-        <small style="color: red;">名称为必填项</small>
-      </div>
-    </nz-form-control>
-  </nz-form-item>
+<!--  <nz-form-item>-->
+<!--    <nz-form-label [nzSpan]="4" nzFor="name">名称</nz-form-label>-->
+<!--    <nz-form-control [nzSpan]="20">-->
+<!--      <input formControlName="name" nz-input placeholder="请输入名称"/>-->
+<!--      <div *ngIf="formGroup.get('name')?.invalid && (formGroup.get('name')?.touched || formGroup.get('name')?.dirty)">-->
+<!--        <small style="color: red;">名称为必填项</small>-->
+<!--      </div>-->
+<!--    </nz-form-control>-->
+<!--  </nz-form-item>-->
 
   <nz-form-item *ngFor="let spec of specControls.controls; let i = index" [formGroup]="getSpecFormGroup(i)">
     <nz-form-control hidden="true">
@@ -48,7 +48,7 @@
     <br><br>
   </nz-form-item>
 
-
+  <button nz-button nzType="dashed" (click)="refreshSku()">refresh</button>
   <nz-table
     nzBordered
     [nzData]="skuTableData"
@@ -76,7 +76,7 @@
         <nz-switch formControlName="sellable" nzCheckedChildren="开" nzUnCheckedChildren="关"></nz-switch>
       </td>
       <ng-container *ngFor="let value of control.value.values">
-        <td>{{ value }}</td>
+        <td>{{ value.value }}</td>
       </ng-container>
       <td>
         <div class="editable-cell" [hidden]="editId === control.value.skuId" (click)="startEdit(control.value.skuId)">
