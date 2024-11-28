@@ -1,49 +1,71 @@
-<nz-table #skuTable nzBordered [nzData]="skuTableData" [nzScroll]="{ x: '80%' }" [nzVirtualItemSize]="50">
-  <thead>
-  <tr>
-    <th>data</th>
-    <th>enable</th>
-    <th *ngFor="let spec of specColumns">{{ spec.specName }}</th>
-    <th nzWidth="100">规格编码</th>
-    <th>价格</th>
-    <th>货币</th>
-    <th>可售库存</th>
-    <th>重量（kg）</th>
-    <th nzRight>操作</th>
-  </tr>
-  </thead>
-  <tbody>
-    @for (item of skuTable.data; track item) {
-      <tr class="editable-row">
-        <td> {{item | json}}</td>
-        <td>
-          <nz-switch [(ngModel)]="item.sellable" nzCheckedChildren="开" nzUnCheckedChildren="关"></nz-switch>
-        </td>
-        <ng-container *ngFor="let value of item.values; index as i">
-          <ng-container>
-            <td>{{ item.values[i] }}</td>
-          </ng-container>
-        </ng-container>
-        <td>
-          <div class="editable-cell" [hidden]="editId === item.skuId" (click)="startEdit(item.skuId)">
-            {{ item.displayName }}
-          </div>
-          <input type="text" required [hidden]="editId !== item.skuId && item.displayName" nz-input
-                 [(ngModel)]="item.displayName" (blur)="stopEdit()" #displayNameInput="ngModel"/>
-          <div *ngIf="displayNameInput.invalid && (displayNameInput.dirty || displayNameInput.touched)">
-            <div>该字段不能为空</div>
-          </div>
-        </td>
-        <td>{{ item.price }}</td>
-        <td>泰铢</td>
-        <td>{{ item.stock }}</td>
-        <td>{{ item.weight }}</td>
-        <td nzRight>
-          <div><a >增加可售库存</a></div>
-          <div><a >减少可售库存</a></div>
-          <div><a >查看变更记录</a></div>
-        </td>
-      </tr>
-    }
-  </tbody>
-</nz-table>
+<form nz-form [formGroup]="formGroup" (ngSubmit)="onSubmit()" nzLayout="vertical">
+  <nz-form-item>
+    <nz-form-label [nzSpan]="4" nzFor="name">名称</nz-form-label>
+    <nz-form-control [nzSpan]="20">
+      <input formControlName="name" nz-input placeholder="请输入名称" />
+      <div *ngIf="formGroup.get('name')?.invalid && (formGroup.get('name')?.touched || formGroup.get('name')?.dirty)">
+        <small style="color: red;">名称为必填项</small>
+      </div>
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-table
+    nzBordered
+    [nzData]="skuTableData"
+    [nzScroll]="{ x: '80%' }"
+    [nzVirtualItemSize]="50"
+  >
+    <thead>
+    <tr>
+      <th>数据</th>
+      <th>启用</th>
+      <th *ngFor="let spec of specColumns">{{ spec.specName }}</th>
+      <th nzWidth="100">规格编码</th>
+      <th>价格</th>
+      <th>货币</th>
+      <th>可售库存</th>
+      <th>重量（kg）</th>
+      <th nzRight>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let control of skuControls.controls; let i = index" class="editable-row" [formGroup]="getFormGroup(i)">
+      <td>{{ control.value | json }}</td>
+      <td>
+        <nz-switch formControlName="sellable" nzCheckedChildren="开" nzUnCheckedChildren="关"></nz-switch>
+      </td>
+      <ng-container *ngFor="let value of control.value.values">
+        <td>{{ value }}</td>
+      </ng-container>
+      <td>
+        <div class="editable-cell" [hidden]="editId === control.value.skuId" (click)="startEdit(control.value.skuId)">
+          {{ control.value.displayName }}
+        </div>
+        <input
+          formControlName="displayName"
+          type="text"
+          required
+          [hidden]="editId !== control.value.skuId && control.value.displayName"
+          nz-input
+          (blur)="stopEdit()"
+        />
+      </td>
+      <td>{{ control.value.price }}</td>
+      <td>泰铢</td>
+      <td>{{ control.value.stock }}</td>
+      <td>{{ control.value.weight }}</td>
+      <td nzRight>
+        <div><a>增加可售库存</a></div>
+        <div><a>减少可售库存</a></div>
+        <div><a>查看变更记录</a></div>
+      </td>
+    </tr>
+    </tbody>
+  </nz-table>
+
+  <nz-form-item>
+    <nz-form-control [nzSpan]="24">
+      <button nz-button nzType="primary" [disabled]="formGroup.invalid">提交</button>
+    </nz-form-control>
+  </nz-form-item>
+</form>
