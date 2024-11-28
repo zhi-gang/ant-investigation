@@ -1,0 +1,49 @@
+<nz-table #skuTable nzBordered [nzData]="skuTableData" [nzScroll]="{ x: '80%' }" [nzVirtualItemSize]="50">
+  <thead>
+  <tr>
+    <th>data</th>
+    <th>enable</th>
+    <th *ngFor="let spec of specColumns">{{ spec.specName }}</th>
+    <th nzWidth="100">规格编码</th>
+    <th>价格</th>
+    <th>货币</th>
+    <th>可售库存</th>
+    <th>重量（kg）</th>
+    <th nzRight>操作</th>
+  </tr>
+  </thead>
+  <tbody>
+    @for (item of skuTable.data; track item) {
+      <tr class="editable-row">
+        <td> {{item | json}}</td>
+        <td>
+          <nz-switch [(ngModel)]="item.sellable" nzCheckedChildren="开" nzUnCheckedChildren="关"></nz-switch>
+        </td>
+        <ng-container *ngFor="let value of item.values; index as i">
+          <ng-container>
+            <td>{{ item.values[i] }}</td>
+          </ng-container>
+        </ng-container>
+        <td>
+          <div class="editable-cell" [hidden]="editId === item.skuId" (click)="startEdit(item.skuId)">
+            {{ item.displayName }}
+          </div>
+          <input type="text" required [hidden]="editId !== item.skuId && item.displayName" nz-input
+                 [(ngModel)]="item.displayName" (blur)="stopEdit()" #displayNameInput="ngModel"/>
+          <div *ngIf="displayNameInput.invalid && (displayNameInput.dirty || displayNameInput.touched)">
+            <div>该字段不能为空</div>
+          </div>
+        </td>
+        <td>{{ item.price }}</td>
+        <td>泰铢</td>
+        <td>{{ item.stock }}</td>
+        <td>{{ item.weight }}</td>
+        <td nzRight>
+          <div><a >增加可售库存</a></div>
+          <div><a >减少可售库存</a></div>
+          <div><a >查看变更记录</a></div>
+        </td>
+      </tr>
+    }
+  </tbody>
+</nz-table>
