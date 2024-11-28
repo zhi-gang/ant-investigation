@@ -25,7 +25,7 @@ import {NzInputDirective} from 'ng-zorro-antd/input';
 })
 export class AppComponent implements OnInit {
   formGroup: FormGroup;
-  spec = [
+  specs = [
     {
       "specId": "s20241127162728654NAR",
       "specName": "宽",
@@ -158,6 +158,7 @@ export class AppComponent implements OnInit {
 
   constructor(private fb: FormBuilder) {
     this.formGroup = this.fb.group({
+      specs: [],
       name: ['', Validators.required],
       skuControls: []
     });
@@ -168,17 +169,61 @@ export class AppComponent implements OnInit {
     this.skuTableData = this.skus.skuSnapshotList;
     this.formGroup = this.fb.group({
       name: ['', Validators.required],
-      skuControls: this.fb.array(this.skuTableData.map((sku: any) => this.createSkuGroup(sku)))
+      skuControls: this.fb.array(this.skuTableData.map((sku: any) => this.createSkuGroup(sku))),
+      specs:       this.fb.array(this.specs.map((spec:any) =>this.createSpecGroup(spec)))
     });
-    // Initialize form group with form array for the table rows
+  }
+  createSpecGroup(spec: any): FormGroup {
+    return this.fb.group({
+      specId: [{ value: spec.specId, disabled: true }], // Read-only
+      specName: [spec.specName, Validators.required],
+      displayOrder: [spec.displayOrder],
+      values: this.fb.array(spec.values.map((value: any) => this.createValueGroup(value)))
+    });
+  }
 
+  createValueGroup(value: any): FormGroup {
+    return this.fb.group({
+      valueId: [{ value: value.valueId, disabled: true }], // Read-only
+      value: [value.value, Validators.required],
+      displayOrder: [value.displayOrder]
+    });
+  }
+
+  // Add a new value to a spec
+  addValue(specIndex: number): void {
+    const valuesArray = this.getValuesArray(specIndex);
+    valuesArray.push(this.createValueGroup({ valueId: '', value: '', displayOrder: 0 }));
+  }
+
+  // Remove a value from a spec
+  removeValue(specIndex: number, valueIndex: number): void {
+    const valuesArray = this.getValuesArray(specIndex);
+    valuesArray.removeAt(valueIndex);
+  }
+
+  // Get the FormArray for values of a specific spec
+  getValuesArray(specIndex: number): FormArray {
+    const specGroup = (this.formGroup.get('specs') as FormArray).at(specIndex) as FormGroup;
+    return specGroup.get('values') as FormArray;
+  }
+
+  get specControls(): FormArray{
+    return this.formGroup.get('specs') as FormArray;
+  }
+  getSpecFormGroup(index: number): FormGroup {
+    return this.specControls.at(index) as FormGroup;
+  }
+  getSpecValueFormGroup(index: number, valueIndex: number): FormGroup {
+    return this.getValuesArray(index).at(valueIndex) as FormGroup;
   }
 
   get skuControls(): FormArray {
     return this.formGroup.get('skuControls') as FormArray;
   }
 
-  getFormGroup(index: number): FormGroup {
+
+  getSkuFormGroup(index: number): FormGroup {
     return this.skuControls.at(index) as FormGroup;
   }
 
@@ -204,7 +249,8 @@ export class AppComponent implements OnInit {
 
   onSubmit(): void {
     if (this.formGroup.valid) {
-      console.log('Form submitted:', this.formGroup.value);
+      const formData = this.formGroup.getRawValue();
+      console.log('Form submitted:', formData);
     } else {
       console.error('Form is invalid');
     }

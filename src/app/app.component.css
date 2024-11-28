@@ -1,0 +1,9 @@
+.values-container {
+  display: flex;
+  flex-wrap: wrap; /* 允许换行 */
+}
+
+.value-item {
+  margin-right: 16px; /* 可以根据需要调整间距 */
+  margin-bottom: 16px; /* 可以根据需要调整间距 */
+}

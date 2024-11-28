@@ -2,12 +2,52 @@
   <nz-form-item>
     <nz-form-label [nzSpan]="4" nzFor="name">名称</nz-form-label>
     <nz-form-control [nzSpan]="20">
-      <input formControlName="name" nz-input placeholder="请输入名称" />
+      <input formControlName="name" nz-input placeholder="请输入名称"/>
       <div *ngIf="formGroup.get('name')?.invalid && (formGroup.get('name')?.touched || formGroup.get('name')?.dirty)">
         <small style="color: red;">名称为必填项</small>
       </div>
     </nz-form-control>
   </nz-form-item>
+
+  <nz-form-item *ngFor="let spec of specControls.controls; let i = index" [formGroup]="getSpecFormGroup(i)">
+    <nz-form-control hidden="true">
+      <label>Spec ID</label>
+      <input formControlName="specId" nz-input [disabled]="true"/>
+    </nz-form-control>
+    <nz-form-control>
+      <label>Spec Name</label>
+      <input formControlName="specName" nz-input placeholder="Enter spec name"/>
+    </nz-form-control>
+    <nz-form-control hidden="true">
+      <label>Display Order</label>
+      <input formControlName="displayOrder" nz-input type="number"/>
+    </nz-form-control>
+
+    <h4>Values</h4>
+    <div formArrayName="values" class="values-container">
+      <div formArrayName="values">
+        <div *ngFor="let value of getValuesArray(i).controls; let j = index" [formGroup]="getSpecValueFormGroup(i,j)"
+             class="value-item">
+          <nz-form-control hidden="true">
+            <label>Value ID</label>
+            <input formControlName="valueId" nz-input [disabled]="true"/>
+          </nz-form-control>
+          <nz-form-control>
+<!--            <label>Value</label>-->
+            <input formControlName="value" nz-input placeholder="Enter value"/>
+          </nz-form-control>
+          <nz-form-control hidden="true">
+            <label>Display Order</label>
+            <input formControlName="displayOrder" nz-input type="number"/>
+          </nz-form-control>
+          <!--          <button nz-button nzType="link" (click)="removeValue(i, j)">Remove Value</button>-->
+        </div>
+      </div>
+    </div>
+    <button nz-button nzType="dashed" (click)="addValue(i)">Add Value</button>
+    <br><br>
+  </nz-form-item>
+
 
   <nz-table
     nzBordered
@@ -29,7 +69,8 @@
     </tr>
     </thead>
     <tbody>
-    <tr *ngFor="let control of skuControls.controls; let i = index" class="editable-row" [formGroup]="getFormGroup(i)">
+    <tr *ngFor="let control of skuControls.controls; let i = index" class="editable-row"
+        [formGroup]="getSkuFormGroup(i)">
       <td>{{ control.value | json }}</td>
       <td>
         <nz-switch formControlName="sellable" nzCheckedChildren="开" nzUnCheckedChildren="关"></nz-switch>
