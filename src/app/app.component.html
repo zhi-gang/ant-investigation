@@ -49,6 +49,9 @@
           nz-input
           (blur)="stopEdit()"
         />
+        <div *ngIf="control?.invalid && ( control.get('displayName')?.dirty)">
+          <small style="color: red;">必填项</small>
+        </div>
       </td>
       <td>{{ control.value.price }}</td>
       <td>泰铢</td>
